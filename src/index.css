@@ -44,3 +44,16 @@
   font-weight: 500;
   color: #ff6868;
 }
+
+.form-input {
+  max-width: 500px;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: 18px;
+  border: 2px solid gray;
+}
+
+.error-style {
+  color: red;
+  font-size: 15px;
+}

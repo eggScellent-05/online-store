@@ -1,32 +1,40 @@
-import sandwich from '../assets/images/img/Fattoush salad.png'
-import star from '../assets/images/icons/star-icon.png'
+import searchBarIcon from '../assets/images/icons/search.svg'
+import { useEffect, useState } from 'react'
+import Products from '../widgets/Products'
+import AddProduct from '../widgets/AddProduct'
 
-const Products = ({ productImage, productTitle, price, rating }) => {
-  return (
-    <div className="flex h-[350px] min-w-[300px] flex-col rounded-2xl border border-neutral-200 px-5 py-6 shadow-xl">
-      <img
-        src={productImage}
-        alt="product"
-        className="mx-6 mb-8 h-48 w-48 self-center"
-      />
-      <h6 className="mb-5 text-xl font-medium tracking-wide">{productTitle}</h6>
+function Specials(props) {
+  const [items, setItems] = useState([])
+  const [query, setQuery] = useState('')
+  const [showForm, setShowForm] = useState(false)
+  const [productData, setProductData] = useState([])
+  const baseUrl = import.meta.env.VITE_BASE_URL
 
-      <div className="flex justify-between">
-        <h6 className="text-lg font-semibold tracking-wide">
-          <span className="orange-heading">$</span>
-          {price}
-        </h6>
+  const filteredProducts = items.filter((item) => {
+    if (query === '') {
+      return item.category === props.clickedCategory
+    } else {
+      return item.title.toLowerCase().includes(query.toLowerCase())
+    }
+  })
 
-        <div className="flex items-center gap-2">
-          <img className="h-3 w-3" src={star} alt="star" />
-          <p className="text-">{rating}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/products`)
+        const data = await response.json()
+        setItems(data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchItems()
+  }, [])
 
-function Specials() {
+  const handleClick = () => {
+    setShowForm(!showForm)
+  }
+
   return (
     <div className="mb-40">
       <h4 className="lg:text-md orange-heading mb-3 uppercase">
@@ -35,25 +43,67 @@ function Specials() {
       <h1 className="normal-heading max-w-[500px]">
         Standout Dishes From Our Menu
       </h1>
-      <div className="flex flex-wrap justify-evenly gap-10">
-        <Products
-          productImage={sandwich}
-          productTitle="Fattoush salad"
-          price="5.99"
-          rating="4.5"
-        />
-        <Products
-          productImage={sandwich}
-          productTitle="Fattoush salad"
-          price="5.99"
-          rating="4.5"
-        />
-        <Products
-          productImage={sandwich}
-          productTitle="Fattoush salad"
-          price="5.99"
-          rating="4.5"
-        />
+
+      <div className="mb-20 flex items-center justify-center rounded-full bg-gradient-to-r from-[#73cdab] to-[#39db4a] py-8">
+        <div className="flex w-[750px] max-w-full items-center rounded-full bg-white py-2 pr-3 pl-5 shadow-lg">
+          <input
+            type="text"
+            className="flex-1 px-4 py-2 text-2xl font-medium text-gray-700 placeholder-gray-500 outline-none"
+            placeholder="Search for anything..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value)
+            }}
+          />
+
+          <button className="rounded-full bg-neutral-500 p-4">
+            <img className="" src={searchBarIcon} alt="search" />
+          </button>
+        </div>
+      </div>
+
+      <button
+        className="bg-green-color-light mb-15 ml-13 rounded-lg px-5 py-3 text-2xl font-semibold text-white shadow-md"
+        onClick={handleClick}
+      >
+        Add Item
+      </button>
+
+      {showForm && <AddProduct setProductData={setProductData} />}
+
+      {productData.length > 0 && (
+        <div className="mb-4 flex justify-start px-10">
+          <div className="flex flex-wrap gap-10 p-3">
+            {productData.map((product, index) => (
+              <Products
+                key={index}
+                productImage={product.productImage}
+                productTitle={product.productTitle}
+                price={product.price}
+                rating={product.rating}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-center px-10">
+        <div className="flex flex-wrap gap-10 p-3">
+          {filteredProducts.length === 0 ? (
+            <h2>No results for your search</h2>
+          ) : (
+            filteredProducts.map((item, index) => (
+              <Products
+                key={index}
+                productId={item.id}
+                productImage={item.image}
+                productTitle={item.title}
+                price={item.price}
+                rating={item.rating.rate}
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   )
